@@ -45,7 +45,10 @@ var player_set = []player{
 }
 
 /*投注总票数*/
-var total_ticket int
+var (
+	total_ticket int
+	mutex        sync.Mutex
+)
 
 /*票流水号*/
 var tickSN int64
@@ -314,8 +317,10 @@ func wager(game_id, wager_issue, index int) {
 	json.Unmarshal(body, &result)
 	retcode, _ := strconv.Atoi(result["RetCode"].(string))
 	if retcode == 0 {
+		mutex.Lock()
 		total_ticket++
 		fmt.Println("total wager ticket count: ", total_ticket)
+		mutex.Unlock()
 	} else {
 		fmt.Printf("GameID:%d, WagerIssue:%d, UserID:%s, RetCode:%d\n", game_id, wager_issue, val.playerID, retcode)
 	}
